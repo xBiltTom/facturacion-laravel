@@ -1,5 +1,10 @@
 <x-guest-layout>
     <!-- Session Status -->
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">¡Bienvenido!</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ingresa tus credenciales para acceder al sistema</p>
+    </div>
+
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
@@ -7,7 +12,7 @@
 
         <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label for="email" :value="__('Email')" class=""/>
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
