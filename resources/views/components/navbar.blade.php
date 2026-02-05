@@ -1,5 +1,5 @@
 <header class="sticky top-0 z-10 bg-white dark:bg-gray-900 shadow-sm">
-    <div class="flex items-center justify-between h-16 px-4 border dark:border-0">
+    <div class="flex items-center justify-between h-16 px-4 border-b dark:border-gray-800">
         <!-- Left side: Menu button & Search -->
         <div class="flex items-center space-x-3">
             <!-- Mobile menu button -->
@@ -136,7 +136,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 scale-100"
                     x-transition:leave-end="opacity-0 scale-95"
-                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-polleria-dark-700 overflow-hidden"
+                    class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden"
                 >
                     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
                         <div class="flex items-center gap-3 mb-2">

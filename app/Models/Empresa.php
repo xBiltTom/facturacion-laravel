@@ -11,7 +11,8 @@ class Empresa extends Model
 
     protected $fillable = [
         'razonSocialEmpresa',
-        'logoEmpresa',
+        'urlLogoEmpresa',
+        'idLogoEmpresa',
         'rucEmpresa',
         'telefonoEmpresa',
         'direccionEmpresa',

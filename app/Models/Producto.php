@@ -18,7 +18,8 @@ class Producto extends Model
         'precioVentaProducto',
         'tieneIGV',
         'stockProducto',
-        'imagenProducto'
+        'urlImagenProducto',
+        'idImagenProducto'
     ];
 
     protected $casts = [

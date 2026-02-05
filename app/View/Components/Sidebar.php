@@ -32,7 +32,7 @@ class Sidebar extends Component
                 'items' => [
                     [
                         'name' => 'Categorias',
-                        'route' => 'categorias.index',
+                        'route' => 'categorias',
                         'icon' => 'cube'
                     ]
                 ]

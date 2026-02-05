@@ -28,6 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Verificar si el usuario tiene empresa registrada
+        if (!$request->user()->empresa()->exists()) {
+            return redirect()->route('empresa.create');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

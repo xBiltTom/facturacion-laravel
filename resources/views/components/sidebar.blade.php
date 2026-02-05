@@ -11,12 +11,17 @@
 
     <!-- Logo y nombre de la app -->
     <div class="flex-shrink-0 flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-800 ">
-        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+        <a href="{{ route('dashboard.index') }}" class="flex items-center space-x-3">
             <!-- Icono de pollo/pollería -->
-            <svg class="w-8 h-8 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
+            {{-- <svg class="w-8 h-8 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-            <span class="text-xl font-bold dark:text-white">Nombre empresa</span>
+            </svg> --}}
+            <img
+                        src="{{ auth()->user()->empresa->urlLogoEmpresa }}"
+                        alt="{{ auth()->user()->name }}"
+                        class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+                    >
+            <span class="text-xl font-bold dark:text-white">{{auth()->user()->empresa->razonSocialEmpresa}}</span>
         </a>
     </div>
 
@@ -31,9 +36,9 @@
                         @foreach($group['items'] as $item)
                             <li>
                                 <a
-                                    href="{{ route($item['route']) }}"
+                                    href="{{ route($item['route'].'.index') }}"
                                     class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200
-                                        {{ request()->routeIs($item['route'])
+                                        {{ request()->routeIs($item['route'].'*')
                                             ? 'bg-gray-300 text-black dark:bg-gray-800 dark:text-white'
                                             : 'text-gray-500 hover:bg-gray-300 hover:text-black dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-white' }}"
                                 >
@@ -51,23 +56,25 @@
     <div class="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 p-4">
         <div class="flex items-center">
             <div class="flex-shrink-0">
-                {{-- @if(auth()->user()->empleado?->urlFotoEmpleado)
+                @if(auth()->user()->empresa->urlLogoEmpresa)
                     <img
-                        src="{{ auth()->user()->empleado->urlFotoEmpleado }}"
+                        src="{{ auth()->user()->empresa->urlLogoEmpresa }}"
                         alt="{{ auth()->user()->name }}"
                         class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
                     >
-                @else --}}
+                @else
                     <div class="w-10 h-10 rounded-full dark:bg-blue-800 bg-black flex items-center justify-center text-white font-semibold">
                         {{ substr(auth()->user()->name ?? 'U', 0, 1) }}
                     </div>
+                @endif
             </div>
             <div class="ml-3 min-w-0 flex-1">
                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {{ auth()->user()->name ?? 'Usuario' }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {{ auth()->user()->email ?? '' }}
+                    {{-- {{ auth()->user()->email ?? '' }} --}}
+                    Administrador de la empresa
                 </p>
             </div>
         </div>
