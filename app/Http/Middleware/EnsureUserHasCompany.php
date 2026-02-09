@@ -27,7 +27,8 @@ class EnsureUserHasCompany
 
             // Si tiene empresa y está intentando acceder al registro de empresa
             if ($hasCompany && ($request->routeIs('empresa.create') || $request->routeIs('empresa.store'))) {
-                return redirect()->refresh();
+                /* return redirect()->refresh(); */
+                return redirect()->route('dashboard.index');
             }
         }
 

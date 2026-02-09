@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 // Importar módulos de utilidades
 import './alert-utils.js';
 import './cloudinary-utils.js';
+import './icon-picker.js';
 
 window.Alpine = Alpine;
 

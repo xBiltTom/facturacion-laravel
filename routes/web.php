@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'verified', 'company.required'])->group(function () {
 
     //Ruta de categorias
     Route::resource('categorias', CategoriaController::class);
+
+    Route::resource('productos',ProductoController::class);
 });
 
 require __DIR__.'/auth.php';

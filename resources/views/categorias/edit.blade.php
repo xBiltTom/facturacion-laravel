@@ -60,23 +60,37 @@
                     <div>
                         <x-input-label for="iconoCategoria" value="Ícono (opcional)" />
                         <div class="mt-2 flex items-center gap-4">
-                            <div class="flex-1">
-                                <x-text-input
-                                    id="iconoCategoria"
-                                    name="iconoCategoria"
-                                    type="text"
-                                    class="block w-full"
-                                    maxlength="100"
-                                    value="{{ old('iconoCategoria', $categoria->iconoCategoria) }}"
-                                    placeholder="Ej: 🍕 🍔 🥤 🍰" />
+                            <!-- Input oculto para el valor del icono -->
+                            <input type="hidden" id="iconoCategoria" name="iconoCategoria" value="{{ old('iconoCategoria', $categoria->iconoCategoria) }}">
+
+                            <!-- Preview del icono -->
+                            <div id="iconoPreview" class="flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-300 dark:border-gray-600">
+                                @if($categoria->iconoCategoria)
+                                    <x-category-icon :icon="$categoria->iconoCategoria" class="w-12 h-12 text-blue-600 dark:text-blue-400" />
+                                @else
+                                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                    </svg>
+                                @endif
                             </div>
-                            <div id="iconoPreview" class="flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-300 dark:border-gray-600">
-                                <span id="iconoPreviewText" class="text-3xl">{{ $categoria->iconoCategoria ?? '📦' }}</span>
+
+                            <!-- Botones -->
+                            <div class="flex flex-col gap-2">
+                                <button type="button" onclick="IconPicker.open()"
+                                        class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white font-medium rounded-md transition">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                    </svg>
+                                    Cambiar Ícono
+                                </button>
+                                <button type="button" onclick="IconPicker.clear()"
+                                        class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md transition text-sm">
+                                    Limpiar
+                                </button>
                             </div>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Puedes usar emojis o texto corto.
-                            <a href="https://emojipedia.org/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">Ver emojis</a>
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Selecciona un ícono SVG de nuestra colección para identificar visualmente esta categoría
                         </p>
                         <div id="error-iconoCategoria" class="mt-2 text-sm text-red-600 hidden"></div>
                     </div>
@@ -117,23 +131,16 @@
         </div>
     </div>
 
+    <!-- Modal de selección de iconos -->
+    <x-icon-picker-modal :selectedIcon="$categoria->iconoCategoria" />
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('categoriaForm');
-            const iconoInput = document.getElementById('iconoCategoria');
-            const iconoPreview = document.getElementById('iconoPreviewText');
 
-            // Preview del ícono en tiempo real
-            if (iconoInput) {
-                iconoInput.addEventListener('input', function() {
-                    if (this.value.trim()) {
-                        iconoPreview.textContent = this.value.trim();
-                    } else {
-                        iconoPreview.textContent = '📦';
-                    }
-                });
-            }
+            // Inicializar el selector de iconos
+            IconPicker.init('iconoCategoria', 'iconoPreview');
 
             // Manejo del formulario
             if (form) {

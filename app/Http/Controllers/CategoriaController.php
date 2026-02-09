@@ -14,14 +14,47 @@ class CategoriaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Categoria::class);
 
         $empresa = Auth::user()->empresa;
-        $categorias = $empresa->categorias()
-            ->orderBy('nombreCategoria', 'asc')
-            ->get();
+        $query = $empresa->categorias();
+
+        // Aplicar filtros de búsqueda
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nombreCategoria', 'like', "%{$search}%")
+                  ->orWhere('descripcionCategoria', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtro por icono (tiene icono o no)
+        if ($request->filled('has_icon')) {
+            if ($request->has_icon === 'with') {
+                $query->whereNotNull('iconoCategoria');
+            } elseif ($request->has_icon === 'without') {
+                $query->whereNull('iconoCategoria');
+            }
+        }
+
+        // Ordenamiento
+        $sortBy = $request->get('sort_by', 'nombreCategoria');
+        $sortOrder = $request->get('sort_order', 'asc');
+
+        $allowedSorts = ['nombreCategoria', 'created_at', 'updated_at'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->orderBy('nombreCategoria', 'asc');
+        }
+
+        // Paginación
+        $perPage = $request->get('per_page', 10);
+        $perPage = in_array($perPage, [5, 10, 25, 50]) ? $perPage : 10;
+
+        $categorias = $query->withCount('productos')->paginate($perPage)->appends($request->except('page'));
 
         return view('categorias.index', compact('categorias'));
     }

@@ -34,6 +34,11 @@ class Sidebar extends Component
                         'name' => 'Categorias',
                         'route' => 'categorias',
                         'icon' => 'cube'
+                    ],
+                    [
+                        'name' => 'Productos',
+                        'route' => 'productos',
+                        'icon' => 'cube'
                     ]
                 ]
             ]

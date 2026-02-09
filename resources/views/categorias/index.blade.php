@@ -14,6 +14,91 @@
     </x-slot>
 
     <div class="p-6">
+        <!-- Filtros y búsqueda -->
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <form method="GET" action="{{ route('categorias.index') }}" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Campo de búsqueda -->
+                    <div class="lg:col-span-2">
+                        <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Buscar
+                        </label>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                name="search"
+                                id="search"
+                                value="{{ request('search') }}"
+                                placeholder="Nombre o descripción..."
+                                class="w-full pl-10 pr-4 py-2 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm">
+                            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por ícono -->
+                    <div>
+                        <label for="has_icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Ícono
+                        </label>
+                        <select
+                            name="has_icon"
+                            id="has_icon"
+                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm">
+                            <option value="">Todos</option>
+                            <option value="with" {{ request('has_icon') === 'with' ? 'selected' : '' }}>Con ícono</option>
+                            <option value="without" {{ request('has_icon') === 'without' ? 'selected' : '' }}>Sin ícono</option>
+                        </select>
+                    </div>
+
+                    <!-- Elementos por página -->
+                    <div>
+                        <label for="per_page" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Mostrar
+                        </label>
+                        <select
+                            name="per_page"
+                            id="per_page"
+                            onchange="this.form.submit()"
+                            class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm">
+                            <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
+                            <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex items-center gap-2">
+                    <button
+                        type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-md transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Buscar
+                    </button>
+                    @if(request()->hasAny(['search', 'has_icon']))
+                        <a
+                            href="{{ route('categorias.index') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md transition">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Limpiar
+                        </a>
+                    @endif
+                    <div class="ml-auto text-sm text-gray-600 dark:text-gray-400">
+                        Mostrando <span class="font-medium">{{ $categorias->firstItem() ?? 0 }}</span>
+                        a <span class="font-medium">{{ $categorias->lastItem() ?? 0 }}</span>
+                        de <span class="font-medium">{{ $categorias->total() }}</span> resultados
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- Tabla de categorías -->
         <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -43,17 +128,19 @@
                     @forelse ($categorias as $index => $categoria)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ $index + 1 }}
+                                {{ $categorias->firstItem() + $index }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($categoria->iconoCategoria)
-                                    <span class="text-2xl">{{ $categoria->iconoCategoria }}</span>
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                        <x-category-icon :icon="$categoria->iconoCategoria" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                    </div>
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700">
+                                        <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                         </svg>
-                                    </span>
+                                    </div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -68,7 +155,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ $categoria->productos->count() }}
+                                    {{ $categoria->productos_count }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -115,6 +202,13 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Paginación -->
+        @if($categorias->hasPages())
+            <div class="mt-6">
+                {{ $categorias->links() }}
+            </div>
+        @endif
     </div>
 
     @push('scripts')

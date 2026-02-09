@@ -15,7 +15,9 @@ class Categoria extends Model
         'idEmpresa',
         'nombreCategoria',
         'descripcionCategoria',
-        'iconoCategoria'
+        'iconoCategoria',
+        'urlIconoCategoria',
+        'idIconoCategoria'
     ];
 
     protected static function boot()
