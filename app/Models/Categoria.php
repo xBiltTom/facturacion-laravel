@@ -20,12 +20,13 @@ class Categoria extends Model
         'idIconoCategoria'
     ];
 
+    //Automatizar la lógica de negocio antes de que los datos toquen la base de datos
     protected static function boot()
     {
-        parent::boot();
+        parent::boot(); //Fundamental para que funcione el método
 
-        static::creating(function ($categoria) {
-            if (empty($categoria->uuid)) {
+        static::creating(function ($categoria) { //Justo antes de guardar en la db, se ejecuta este método
+            if (empty($categoria->uuid)) { //Revisa si el campo uuid se encuentra vacío, si lo está genera uno automáticamente
                 $categoria->uuid = (string) Str::uuid();
             }
         });

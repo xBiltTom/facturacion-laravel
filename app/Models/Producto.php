@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Producto extends Model
 {
@@ -10,6 +11,7 @@ class Producto extends Model
     protected  $primaryKey = 'idProducto';
 
     protected $fillable = [
+        'uuid',
         'idEmpresa',
         'idCategoria',
         'idUnidad',
@@ -21,6 +23,16 @@ class Producto extends Model
         'urlImagenProducto',
         'idImagenProducto'
     ];
+
+    protected static function boot(){
+        parent::boot();
+
+        static::creating(function ($producto) {
+            if(empty($producto->uuid)){
+                $producto->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     protected $casts = [
         'precioVentaProducto' => 'decimal:2',

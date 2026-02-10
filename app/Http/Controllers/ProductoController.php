@@ -31,6 +31,7 @@ class ProductoController extends Controller
     public function create()
     {
         //
+        $this->authorize('create', Producto::class);
         return view('productos.create');
     }
 
@@ -39,6 +40,8 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create',Producto::class);
+
         //
     }
 

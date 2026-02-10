@@ -31,31 +31,30 @@ class CategoriaController extends Controller
         }
 
         // Filtro por icono (tiene icono o no)
-        if ($request->filled('has_icon')) {
-            if ($request->has_icon === 'with') {
+        if ($request->filled('has_icon')) { //pregunta si el objeto request viene con un objeto de llave has_icon y si tiene contenido
+            if ($request->has_icon === 'with') {  //pregunta si se escogio la opcion de traer a los que tienen icono y los trae
                 $query->whereNotNull('iconoCategoria');
-            } elseif ($request->has_icon === 'without') {
-                $query->whereNull('iconoCategoria');
+            } elseif ($request->has_icon === 'without') { //pregunta si se escogio la opcion de traer sin icono
+                $query->whereNull('iconoCategoria'); //trae a las categorias que no cuenten con icono
             }
         }
 
         // Ordenamiento
-        $sortBy = $request->get('sort_by', 'nombreCategoria');
-        $sortOrder = $request->get('sort_order', 'asc');
+        $sortBy = $request->get('sort_by', 'nombreCategoria'); //obtiene el valor de la clave sort_by o usa el valor por defecto y lo almacena en la variable $sort_by
+        $sortOrder = $request->get('sort_order', 'asc'); //obtiene el valor de la clave sort_order o usa el valor por defecto
 
-        $allowedSorts = ['nombreCategoria', 'created_at', 'updated_at'];
-        if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $sortOrder);
+        $allowedSorts = ['nombreCategoria', 'created_at', 'updated_at']; //crea un array donde coloca las columnas disponibles para ordenar por ellas
+        if (in_array($sortBy, $allowedSorts)) { //pregunta si el valor de sortBy se encuentra dentro del arreglo de disponibles
+            $query->orderBy($sortBy, $sortOrder); //si se encuentra en la consulta principal ordena por la columna y usa el tipo de orden
         } else {
-            $query->orderBy('nombreCategoria', 'asc');
+            $query->orderBy('nombreCategoria', 'asc'); //si el valor de la clave sortBy no se encuentra dentro del arreglo de disponibles entonces usa el valor por defecto
         }
 
         // Paginación
-        $perPage = $request->get('per_page', 10);
-        $perPage = in_array($perPage, [5, 10, 25, 50]) ? $perPage : 10;
-
-        $categorias = $query->withCount('productos')->paginate($perPage)->appends($request->except('page'));
-
+        $perPage = $request->get('per_page', 10); //obtiene el valor de la clave per page para paginar o usa el valor por defecto si la clave regresa sin valor o no existe
+        $perPage = in_array($perPage, [5, 10, 25, 50]) ? $perPage : 10; //pregunta si el valor recibido de per page se encuentra dentro de un vector de disponibles y si no usa el valor por defecto que es 10
+        //appends es un metodo para añadir parametros a la URL
+        $categorias = $query->withCount('productos')->paginate($perPage)->appends($request->except('page')); //Cuenta cuentos productos tiene la categoría, los pagina segun lo definido y a cada boton de paginacion le añade la informacion de la url menos el numero de pag por q eso se añade cuando se usa el boton
         return view('categorias.index', compact('categorias'));
     }
 
