@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoriaController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests; //trait para manejar su policy asociada
 
     /**
      * Display a listing of the resource.
@@ -18,14 +18,14 @@ class CategoriaController extends Controller
     {
         $this->authorize('viewAny', Categoria::class);
 
-        $empresa = Auth::user()->empresa;
-        $query = $empresa->categorias();
+        $empresa = Auth::user()->empresa; //obtiene la empresa del usuario autenticado
+        $query = $empresa->categorias(); //obtiene las categorias del usuario autenticado
 
         // Aplicar filtros de búsqueda
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nombreCategoria', 'like', "%{$search}%")
+        if ($request->filled('search')) { //Con el metodo filled comprueba que exista la llave y el valor, es decir que search venga en el objeto request y aparte traiga un valor consigo
+            $search = $request->search; //accede al valor de search y lo asigna a la variable del mismo nombre
+            $query->where(function($q) use ($search) { //q es el nombre de una subconsulta, es decir un parentesis dentro de la consulta princial. Se usa 'use' para pasar la variable search dentro de la subconsulta
+                $q->where('nombreCategoria', 'like', "%{$search}%") //Busca si hay coincidencia entre el parametro de busqueda y el nombre o la descripcion de la categoria
                   ->orWhere('descripcionCategoria', 'like', "%{$search}%");
             });
         }

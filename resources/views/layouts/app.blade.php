@@ -69,7 +69,7 @@
                 </main>
             </div>
         </div>
-
+        @include('partials.alert_has_company')
         @stack('scripts')
     </body>
 </html>

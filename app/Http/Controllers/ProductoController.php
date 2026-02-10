@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Producto;
-use Illuminate\Http\Request;
+use App\Models\Producto; //Importacion del modelo Producto, a quien le pertenece este controlador
+use Illuminate\Http\Request; //Se usara la clase request para manejar peticiones HTTP entrantes como envio de datos desde un formulario o API
+use Illuminate\Support\Facades\Auth; //Uso de la fachada Auth para acceder al usuario autenticado actualmente
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests; //Acceso al metodo authorize que se usa para aplicar politicas de autorizacion en las acciones del controlador
 
 class ProductoController extends Controller
 {
+
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('productos.index');
+        $this->authorize('viewAny',Producto::class);
+        $empresa = Auth::user()->empresa;
+        $query = $empresa->productos;
+
+        /* $perPage = $request->get('per_page',10); */
+        $productos = $query;
+        return view('productos.index', compact('productos'));
     }
 
     /**
@@ -21,6 +31,7 @@ class ProductoController extends Controller
     public function create()
     {
         //
+        return view('productos.create');
     }
 
     /**

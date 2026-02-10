@@ -9,6 +9,7 @@ use Cloudinary\Cloudinary;
 
 class EmpresaController extends Controller
 {
+
     protected $cloudinary;
 
     public function __construct()
@@ -23,8 +24,7 @@ class EmpresaController extends Controller
     {
         // Verificar si el usuario ya tiene una empresa
         if (Auth::user()->empresa()->exists()) {
-            return redirect()->back();
-
+            return redirect()->back()->with('has_company','Ya tienes una empresa registrada');
         }
 
         return view('empresa.create');
@@ -92,7 +92,7 @@ class EmpresaController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Empresa registrada exitosamente',
-                'redirect' => route('dashboard')
+                'redirect' => route('dashboard.index')
             ]);
 
         } catch (\Exception $e) {

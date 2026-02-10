@@ -15,6 +15,25 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+
+    @if(session('needs_company'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                /* const msg = @json(session('needs_company')); */
+                window.AlertUtils.showErrorToast(@json(session('needs_company')),2000);
+                /* (function waitForAlertUtils(attempts = 0) {
+                    if (AlertUtils) {
+                        AlertUtils.showErrorToast(msg);
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'warning', title: 'Atención', text: msg, confirmButtonColor: '#2563eb' });
+                    } else if (attempts < 40) {
+                        setTimeout(() => waitForAlertUtils(attempts + 1), 50);
+                    }
+                })(); */
+            });
+        </script>
+    @endif
+
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
         <!-- Logo -->
         <div class="mb-6">

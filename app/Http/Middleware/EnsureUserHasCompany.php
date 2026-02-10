@@ -22,7 +22,7 @@ class EnsureUserHasCompany
 
             // Si no tiene empresa y no está en la ruta de registro de empresa
             if (!$hasCompany && !$request->routeIs('empresa.create') && !$request->routeIs('empresa.store')) {
-                return redirect()->route('empresa.create');
+                return redirect()->route('empresa.create')->with('needs_company','Debes registrar una empresa primero');
             }
 
             // Si tiene empresa y está intentando acceder al registro de empresa
