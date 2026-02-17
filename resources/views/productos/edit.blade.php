@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <h2 class="font-semibold text-xl text-black dark:text-white leading-tight">
-                Nuevo Producto
+                Editar Producto
             </h2>
         </div>
     </x-slot>
@@ -16,31 +16,59 @@
         <div class="max-w-4xl mx-auto">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                 {{-- Header del card --}}
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                    <h3 class="text-lg font-semibold text-white">Información del Producto</h3>
-                    <p class="text-sm text-blue-100 mt-1">Complete los datos para crear un nuevo producto</p>
+                <div class="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white">Modificar Información del Producto</h3>
+                    <p class="text-sm text-amber-100 mt-1">Actualiza los datos del producto <span class="font-bold">{{ $producto->nombreProducto }}</span></p>
+                </div>
+
+                {{-- Info adicional --}}
+                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Creado: {{ $producto->created_at->format('d/m/Y H:i') }}
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            Categoría: {{ $producto->categoria->nombreCategoria }}
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            Stock actual: {{ $producto->stockProducto }} {{ $producto->unidad->nombreUnidad }}
+                        </div>
+                    </div>
                 </div>
 
                 {{-- FORMULARIO --}}
-                <form id="productoForm" class="p-6 space-y-6">
+                <form id="productoEditForm" class="p-6 space-y-6">
                     @csrf
+                    @method('PUT')
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {{-- Columna izquierda: Imagen --}}
                         <div class="lg:col-span-1">
                             <x-input-label for="imagenProducto" value="Imagen del producto" />
                             <div class="mt-2 flex flex-col items-center">
-                                <!-- Preview de la imagen -->
-                                <div id="imagenPreview" class="mb-4 hidden">
-                                    <img id="imagenPreviewImg" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border-4 border-gray-200 dark:border-gray-700 shadow-md">
+                                <!-- Preview de la imagen actual o nueva -->
+                                <div id="imagenPreview" class="mb-4">
+                                    <img id="imagenPreviewImg"
+                                         src="{{ $producto->imagenProducto }}"
+                                         alt="{{ $producto->nombreProducto }}"
+                                         class="w-full h-48 object-cover rounded-lg border-4 border-gray-200 dark:border-gray-700 shadow-md">
                                 </div>
 
-                                <!-- Botón para seleccionar imagen -->
-                                <label for="imagenInput" class="cursor-pointer inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg w-full justify-center">
+                                <!-- Botón para cambiar imagen -->
+                                <label for="imagenInput" class="cursor-pointer inline-flex items-center px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg w-full justify-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                     </svg>
-                                    Seleccionar Imagen
+                                    Cambiar Imagen
                                 </label>
                                 <input type="file" id="imagenInput" name="imagen" accept="image/*" class="hidden">
                                 <input type="hidden" id="imagenProducto" name="imagenProducto">
@@ -60,6 +88,7 @@
                                     type="text"
                                     class="mt-1 block w-full"
                                     maxlength="150"
+                                    value="{{ $producto->nombreProducto }}"
                                     required
                                     autofocus
                                     placeholder="Ej: Combo Familiar, Pizza Hawaiana, etc." />
@@ -75,7 +104,7 @@
                                     rows="3"
                                     maxlength="500"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                    placeholder="Describe el producto..."></textarea>
+                                    placeholder="Describe el producto...">{{ $producto->descripcionProducto }}</textarea>
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Máximo 500 caracteres</p>
                                 <div id="error-descripcionProducto" class="mt-2 text-sm text-red-600 hidden"></div>
                             </div>
@@ -91,7 +120,8 @@
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                         <option value="">Seleccione una categoría</option>
                                         @foreach($categorias as $categoria)
-                                            <option value="{{ $categoria->idCategoria }}">
+                                            <option value="{{ $categoria->idCategoria }}"
+                                                {{ $categoria->idCategoria == $producto->idCategoria ? 'selected' : '' }}>
                                                 {{ $categoria->iconoCategoria }} {{ $categoria->nombreCategoria }}
                                             </option>
                                         @endforeach
@@ -109,7 +139,10 @@
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                         <option value="">Seleccione una unidad</option>
                                         @foreach($unidades as $unidad)
-                                            <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombreUnidad }}</option>
+                                            <option value="{{ $unidad->idUnidad }}"
+                                                {{ $unidad->idUnidad == $producto->idUnidad ? 'selected' : '' }}>
+                                                {{ $unidad->nombreUnidad }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     <div id="error-idUnidad" class="mt-2 text-sm text-red-600 hidden"></div>
@@ -129,6 +162,7 @@
                                             step="0.01"
                                             min="0"
                                             max="999999.99"
+                                            value="{{ $producto->precioVentaProducto }}"
                                             required
                                             class="pl-10 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                             placeholder="0.00">
@@ -138,12 +172,13 @@
 
                                 <!-- Stock -->
                                 <div>
-                                    <x-input-label for="stockProducto" value="Stock inicial *" />
+                                    <x-input-label for="stockProducto" value="Stock *" />
                                     <input
                                         type="number"
                                         id="stockProducto"
                                         name="stockProducto"
                                         min="0"
+                                        value="{{ $producto->stockProducto }}"
                                         required
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         placeholder="0">
@@ -156,11 +191,15 @@
                                 <x-input-label value="¿El precio incluye IGV? *" />
                                 <div class="mt-2 space-y-2">
                                     <label class="inline-flex items-center mr-6">
-                                        <input type="radio" name="tieneIGV" value="1" required class="form-radio text-indigo-600 dark:bg-gray-900 dark:border-gray-700">
+                                        <input type="radio" name="tieneIGV" value="1"
+                                               {{ $producto->tieneIGV == 1 ? 'checked' : '' }}
+                                               required class="form-radio text-indigo-600 dark:bg-gray-900 dark:border-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Sí, incluye IGV</span>
                                     </label>
                                     <label class="inline-flex items-center">
-                                        <input type="radio" name="tieneIGV" value="0" required class="form-radio text-indigo-600 dark:bg-gray-900 dark:border-gray-700">
+                                        <input type="radio" name="tieneIGV" value="0"
+                                               {{ $producto->tieneIGV == 0 ? 'checked' : '' }}
+                                               required class="form-radio text-indigo-600 dark:bg-gray-900 dark:border-gray-700">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">No incluye IGV</span>
                                     </label>
                                 </div>
@@ -178,11 +217,11 @@
                         <button
                             type="submit"
                             id="submitBtn"
-                            class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-medium rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Crear Producto
+                            Guardar Cambios
                         </button>
                     </div>
                 </form>
@@ -194,9 +233,10 @@
     <script>
         let selectedFile = null;
         let uploadedImageBase64 = null;
+        const currentImage = "{{ $producto->imagenProducto }}";
 
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('productoForm');
+            const form = document.getElementById('productoEditForm');
             const imagenInput = document.getElementById('imagenInput');
 
             if (imagenInput) {
@@ -231,12 +271,10 @@
 
         function showPreview(file) {
             const reader = new FileReader();
-            const previewContainer = document.getElementById('imagenPreview');
             const previewImg = document.getElementById('imagenPreviewImg');
 
             reader.onload = function(e) {
                 previewImg.src = e.target.result;
-                previewContainer.classList.remove('hidden');
             };
 
             reader.readAsDataURL(file);
@@ -253,7 +291,7 @@
             reader.onerror = function() {
                 AlertUtils.showError('Error', 'Error al procesar la imagen');
                 document.getElementById('imagenInput').value = '';
-                document.getElementById('imagenPreview').classList.add('hidden');
+                document.getElementById('imagenPreviewImg').src = currentImage;
                 uploadedImageBase64 = null;
             };
 
@@ -272,7 +310,7 @@
                 precioVentaProducto: document.getElementById('precioVentaProducto').value,
                 tieneIGV: document.querySelector('input[name="tieneIGV"]:checked')?.value,
                 stockProducto: document.getElementById('stockProducto').value,
-                imagenProducto: uploadedImageBase64
+                imagenProducto: uploadedImageBase64 || null
             };
 
             // Validación
@@ -285,11 +323,15 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
 
-            AlertUtils.showLoading('Creando producto...', 'Estamos subiendo la imagen y registrando el producto');
+            const loadingMessage = uploadedImageBase64
+                ? 'Actualizando producto y subiendo nueva imagen...'
+                : 'Actualizando producto...';
+
+            AlertUtils.showLoading('Actualizando producto', loadingMessage);
 
             try {
-                const response = await fetch('{{ route("productos.store") }}', {
-                    method: 'POST',
+                const response = await fetch('{{ route("productos.update", $producto->uuid) }}', {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -307,13 +349,13 @@
                         AlertUtils.showError('Error', 'Por favor corrige los errores en el formulario');
                     } else {
                         AlertUtils.closeLoading();
-                        AlertUtils.showError('Error', data.message || 'Error al crear el producto');
+                        AlertUtils.showError('Error', data.message || 'Error al actualizar el producto');
                     }
                     submitBtn.disabled = false;
                     return;
                 }
 
-                await AlertUtils.showSuccess('¡Producto creado!', data.message);
+                await AlertUtils.showSuccess('¡Producto actualizado!', data.message);
                 window.location.href = data.redirect || '{{ route("productos.index") }}';
 
             } catch (error) {

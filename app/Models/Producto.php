@@ -39,6 +39,14 @@ class Producto extends Model
         'tieneIGV' => 'boolean'
     ];
 
+    /**
+     * Obtener la ruta del modelo usando UUID
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
     public function empresa(){
         return $this->belongsTo(Empresa::class,'idEmpresa','idEmpresa');
     }

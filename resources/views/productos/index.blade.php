@@ -49,17 +49,15 @@
                     @forelse ($productos as $index => $producto)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ $productos->firstItem() + $index }}
+                                {{ $index + 1 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($producto->urlImagenProducto)
-                                    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                                        <p>{{$producto->urlImagenProducto}}</p>
-                                    </div>
+                                    <img src="{{ $producto->urlImagenProducto }}" alt="{{ $producto->nombreProducto }}" class="w-12 h-12 rounded-lg object-cover shadow-sm">
                                 @else
-                                    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700">
+                                    <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700">
                                         <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
                                 @endif
@@ -85,9 +83,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ $producto->precioVentaProducto}}
-                                </span>
+                                <span class="font-medium">S/ {{ number_format($producto->precioVentaProducto, 2) }}</span>
+                                @if($producto->tieneIGV)
+                                    <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">(Inc. IGV)</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
@@ -101,13 +100,13 @@
                                     </a>
 
                                     <!-- Botón Eliminar -->
-                                    {{-- <button onclick="eliminarproducto('{{ $producto->uuid }}', '{{ $producto->nombreproducto }}')"
+                                    <button onclick="eliminarProducto('{{ $producto->uuid }}', '{{ $producto->nombreProducto }}')"
                                             class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white rounded-md transition duration-150 ease-in-out"
                                             title="Eliminar">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
-                                    </button> --}}
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -134,6 +133,43 @@
             </table>
         </div>
     </div>
+    @push('scripts')
+    <script>
+        async function eliminarProducto(uuid, nombre) {
+            const result = await AlertUtils.showDeleteConfirm(`el producto "${nombre}"`);
 
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            AlertUtils.showLoading('Eliminando producto...');
+
+            try {
+                const response = await fetch(`/productos/${uuid}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                AlertUtils.closeLoading();
+
+                if (response.ok && data.success) {
+                    await AlertUtils.showSuccess('¡Eliminado!', data.message);
+                    window.location.reload();
+                } else {
+                    AlertUtils.showError('Error', data.message || 'No se pudo eliminar el producto');
+                }
+            } catch (error) {
+                AlertUtils.closeLoading();
+                AlertUtils.showError('Error', 'Ocurrió un error inesperado');
+                console.error(error);
+            }
+        }
+    </script>
+    @endpush
 
 </x-app-layout>

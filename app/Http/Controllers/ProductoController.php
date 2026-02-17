@@ -2,26 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Producto; //Importacion del modelo Producto, a quien le pertenece este controlador
-use Illuminate\Http\Request; //Se usara la clase request para manejar peticiones HTTP entrantes como envio de datos desde un formulario o API
-use Illuminate\Support\Facades\Auth; //Uso de la fachada Auth para acceder al usuario autenticado actualmente
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests; //Acceso al metodo authorize que se usa para aplicar politicas de autorizacion en las acciones del controlador
+use App\Models\Producto;
+use App\Models\Categoria;
+use App\Models\Unidad;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Cloudinary\Cloudinary;
 
 class ProductoController extends Controller
 {
-
     use AuthorizesRequests;
+
+    protected $cloudinary;
+
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary(config('cloudinary.cloud_url'));
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $this->authorize('viewAny',Producto::class);
-        $empresa = Auth::user()->empresa;
-        $query = $empresa->productos;
+        $this->authorize('viewAny', Producto::class);
 
-        /* $perPage = $request->get('per_page',10); */
-        $productos = $query;
+        $empresa = Auth::user()->empresa;
+        $productos = $empresa->productos()
+            ->with(['categoria', 'unidad'])
+            ->orderBy('nombreProducto', 'asc')
+            ->get();
+
         return view('productos.index', compact('productos'));
     }
 
@@ -30,9 +42,13 @@ class ProductoController extends Controller
      */
     public function create()
     {
-        //
         $this->authorize('create', Producto::class);
-        return view('productos.create');
+
+        $empresa = Auth::user()->empresa;
+        $categorias = $empresa->categorias()->orderBy('nombreCategoria')->get();
+        $unidades = Unidad::orderBy('nombreUnidad')->get();
+
+        return view('productos.create', compact('categorias', 'unidades'));
     }
 
     /**
@@ -40,9 +56,76 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create',Producto::class);
+        $this->authorize('create', Producto::class);
 
-        //
+        $validated = $request->validate([
+            'nombreProducto' => 'required|string|max:150',
+            'descripcionProducto' => 'nullable|string|max:500',
+            'idCategoria' => 'required|exists:categoria,idCategoria',
+            'idUnidad' => 'required|exists:unidad,idUnidad',
+            'precioVentaProducto' => 'required|numeric|min:0|max:999999.99',
+            'tieneIGV' => 'required|boolean',
+            'stockProducto' => 'required|integer|min:0',
+            'imagenProducto' => 'nullable|string'
+        ]);
+
+        try {
+            $urlImagen = null;
+            $idImagen = null;
+
+            // Subir imagen a Cloudinary si existe
+            if ($request->imagenProducto) {
+                try {
+                    $uploadResult = $this->cloudinary->uploadApi()->upload($request->imagenProducto, [
+                        'folder' => 'productos',
+                        'transformation' => [
+                            'width' => 800,
+                            'height' => 800,
+                            'crop' => 'limit'
+                        ]
+                    ]);
+
+                    $urlImagen = $uploadResult['secure_url'];
+                    $idImagen = $uploadResult['public_id'];
+                } catch (\Exception $uploadError) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al subir la imagen: ' . $uploadError->getMessage()
+                    ], 500);
+                }
+            }
+
+            // Crear el producto
+            $producto = Producto::create([
+                'idEmpresa' => Auth::user()->empresa->idEmpresa,
+                'idCategoria' => $validated['idCategoria'],
+                'idUnidad' => $validated['idUnidad'],
+                'nombreProducto' => $validated['nombreProducto'],
+                'descripcionProducto' => $validated['descripcionProducto'],
+                'precioVentaProducto' => $validated['precioVentaProducto'],
+                'tieneIGV' => $validated['tieneIGV'],
+                'stockProducto' => $validated['stockProducto'],
+                'urlImagenProducto' => $urlImagen,
+                'idImagenProducto' => $idImagen
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Producto creado exitosamente',
+                    'redirect' => route('productos.index')
+                ]);
+            }
+
+            return redirect()->route('productos.index')
+                ->with('success', 'Producto creado exitosamente');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el producto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -50,7 +133,8 @@ class ProductoController extends Controller
      */
     public function show(Producto $producto)
     {
-        //
+        $this->authorize('view', $producto);
+        return view('productos.show', compact('producto'));
     }
 
     /**
@@ -58,7 +142,13 @@ class ProductoController extends Controller
      */
     public function edit(Producto $producto)
     {
-        //
+        $this->authorize('update', $producto);
+
+        $empresa = Auth::user()->empresa;
+        $categorias = $empresa->categorias()->orderBy('nombreCategoria')->get();
+        $unidades = Unidad::orderBy('nombreUnidad')->get();
+
+        return view('productos.edit', compact('producto', 'categorias', 'unidades'));
     }
 
     /**
@@ -66,7 +156,86 @@ class ProductoController extends Controller
      */
     public function update(Request $request, Producto $producto)
     {
-        //
+        $this->authorize('update', $producto);
+
+        $validated = $request->validate([
+            'nombreProducto' => 'required|string|max:150',
+            'descripcionProducto' => 'nullable|string|max:500',
+            'idCategoria' => 'required|exists:categoria,idCategoria',
+            'idUnidad' => 'required|exists:unidad,idUnidad',
+            'precioVentaProducto' => 'required|numeric|min:0|max:999999.99',
+            'tieneIGV' => 'required|boolean',
+            'stockProducto' => 'required|integer|min:0',
+            'imagenProducto' => 'nullable|string',
+            'cambiarImagen' => 'nullable|boolean'
+        ]);
+
+        try {
+            $urlImagen = $producto->urlImagenProducto;
+            $idImagen = $producto->idImagenProducto;
+
+            // Si se solicita cambiar la imagen
+            if ($request->cambiarImagen && $request->imagenProducto) {
+                // Eliminar imagen anterior de Cloudinary si existe
+                if ($producto->idImagenProducto) {
+                    try {
+                        $this->cloudinary->uploadApi()->destroy($producto->idImagenProducto);
+                    } catch (\Exception $e) {
+                        // Continuar aunque falle la eliminación
+                    }
+                }
+
+                // Subir nueva imagen
+                try {
+                    $uploadResult = $this->cloudinary->uploadApi()->upload($request->imagenProducto, [
+                        'folder' => 'productos',
+                        'transformation' => [
+                            'width' => 800,
+                            'height' => 800,
+                            'crop' => 'limit'
+                        ]
+                    ]);
+
+                    $urlImagen = $uploadResult['secure_url'];
+                    $idImagen = $uploadResult['public_id'];
+                } catch (\Exception $uploadError) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al subir la nueva imagen: ' . $uploadError->getMessage()
+                    ], 500);
+                }
+            }
+
+            // Actualizar el producto
+            $producto->update([
+                'idCategoria' => $validated['idCategoria'],
+                'idUnidad' => $validated['idUnidad'],
+                'nombreProducto' => $validated['nombreProducto'],
+                'descripcionProducto' => $validated['descripcionProducto'],
+                'precioVentaProducto' => $validated['precioVentaProducto'],
+                'tieneIGV' => $validated['tieneIGV'],
+                'stockProducto' => $validated['stockProducto'],
+                'urlImagenProducto' => $urlImagen,
+                'idImagenProducto' => $idImagen
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Producto actualizado exitosamente',
+                    'redirect' => route('productos.index')
+                ]);
+            }
+
+            return redirect()->route('productos.index')
+                ->with('success', 'Producto actualizado exitosamente');
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el producto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -74,6 +243,38 @@ class ProductoController extends Controller
      */
     public function destroy(Producto $producto)
     {
-        //
+        $this->authorize('delete', $producto);
+
+        try {
+            // Verificar si tiene ventas asociadas
+            if ($producto->detalleVenta()->count() > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar el producto porque tiene ventas asociadas'
+                ], 400);
+            }
+
+            // Eliminar imagen de Cloudinary si existe
+            if ($producto->idImagenProducto) {
+                try {
+                    $this->cloudinary->uploadApi()->destroy($producto->idImagenProducto);
+                } catch (\Exception $e) {
+                    // Continuar aunque falle la eliminación de la imagen
+                }
+            }
+
+            $producto->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto eliminado exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el producto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
+
